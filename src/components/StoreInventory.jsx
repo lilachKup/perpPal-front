@@ -39,14 +39,23 @@ const StoreInventory = () => {
      else {
       console.log("POST /data received");
       setProducts([...products, { ...newProduct, id: Date.now() }]);
-      axios.post("https://xm68oc8dg2.execute-api.us-east-1.amazonaws.com/dev", {
-        market_id: 0,
+      axios.post("https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add", {
+        store_id: 2,
+        product_name: newProduct.name,
+        category: newProduct.category,
+        description: " ",
+        tag: " ",
+        price: newProduct.price,
+        quantity: newProduct.quantity,
+        image_url: null
+
+        /*market_id: 0,
         name: newProduct.name,
         description: " ",
         price: newProduct.price,
         category: newProduct.category,
         quantity: newProduct.quantity,
-        image: null
+        image: null*/
       })
       .then((response) => {
         console.log("Response from Lambda:", response.data);
@@ -125,7 +134,7 @@ const StoreInventory = () => {
       <ul className="product-list">
         {products.filter((product) => (!categoryChoice || product.category === categoryChoice)).map((product) => (
           <li key={product.id} className="product-item">
-            <img src={product.image || "https://via.placeholder.com/50"} alt={product.name} className="product-image" />
+            <img src={product.image || "https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png"} alt={product.name} className="product-image" />
             <div className="product-details">
               <span>{product.name}</span>
               <span>{product.category}</span>
