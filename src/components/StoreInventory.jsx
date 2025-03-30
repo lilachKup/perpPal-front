@@ -31,7 +31,6 @@ const StoreInventory = () => {
       return;
     }
     if (editingProduct !== null) {
-      console.log("bad");
       setProducts(products.map((product) =>
         product.id === editingProduct ? { ...newProduct, id: editingProduct } : product
       ));
@@ -58,7 +57,7 @@ const StoreInventory = () => {
       
 
     }
-    setNewProduct({ name: "", price: "", quantity: "", image: "" });
+    setNewProduct({ name: "", price: "", quantity: "", image: "", category: categoryChoice }); // Clear form fields after submission
     setError(""); // Clear error after successful addition
   };
 
@@ -79,7 +78,13 @@ const StoreInventory = () => {
 
   const HandleCategoryClick = (e) => {  
     setCategoryChoice(e);
+    setNewProduct({ ...newProduct, category: e });
 
+  }
+
+  const handleNoneCategoryClick = () => {
+    setCategoryChoice("");
+    setNewProduct({ ...newProduct, category: "" });
   }
 
   return (
@@ -114,11 +119,11 @@ const StoreInventory = () => {
               </li>
             ))}
           </ul>
-          {(categoryChoice) && (<button className="cancel-choice" onClick={() => setCategoryChoice("")}>None</button>)}
+          {(categoryChoice) && (<button className="cancel-choice" onClick={handleNoneCategoryClick}>None</button>)}
         </div>
       </div>
       <ul className="product-list">
-        {products.filter((product) => product.category === categoryChoice).map((product) => (
+        {products.filter((product) => (!categoryChoice || product.category === categoryChoice)).map((product) => (
           <li key={product.id} className="product-item">
             <img src={product.image || "https://via.placeholder.com/50"} alt={product.name} className="product-image" />
             <div className="product-details">
