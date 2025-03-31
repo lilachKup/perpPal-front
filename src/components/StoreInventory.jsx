@@ -13,7 +13,7 @@ const store_info = {
 
 
 const StoreInventory = () => {
-  const urlToPostAddProduct = "https://qbaqxcpvnj.execute-api.us-east-1.amazonaws.com/dev/market/items"; //matanlambda
+  //const urlToPostAddProduct = "https://qbaqxcpvnj.execute-api.us-east-1.amazonaws.com/dev/market/items"; //matanlambda
   //const urlToPostAddProduct = "https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add"; //nivlambda
   const [products, setProducts] = useState([]);
   const [newProduct, setNewProduct] = useState({ id: "", name: "", category: "", price: "", quantity: "", description: "", brand: "", image: "" });
@@ -28,6 +28,19 @@ const StoreInventory = () => {
   }, []);
 
 
+  const addProducts = async (productToAdd) => {
+    try {
+      const response = await axios.post(
+        'https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add',
+        productToAdd
+      );
+      console.log("Response from Lambda:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error from Lambda:", error);
+      throw error; 
+    }
+  }
 
   const fetchProducts = async () => {
     try {
@@ -41,13 +54,63 @@ const StoreInventory = () => {
     }
   };
 
+  const editProductFromStore = async (store_id, product_id, description, price, quantity, image_url) => {
+    try {
+
+      const response = await fetch('https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/edit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ store_id, product_id, description, price, quantity, image_url })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('Product updated successfully!');
+        console.log('updated/deleted product:', data.product);
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('Something went wrong while deleting the product.');
+    }
+  };
+
+  const deleteProductFromStore = async (store_id, product_id) => {
+    try {
+
+      const response = await fetch('https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/deleteFromStore', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ store_id, product_id })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        //alert('Product deleted successfully!');
+        console.log('Deleted product:', data.product);
+      } else {
+        alert(`Error: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Fetch error:', error);
+      alert('Something went wrong while deleting the product.');
+    }
+  };
+
 
   const handleChange = (e) => {
     setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
     setError(""); // Clear error message when typing
   };
 
-  const addProduct = () => {
+  const addProduct = async () => {
 
     const missingFields = [];
 
@@ -65,12 +128,15 @@ const StoreInventory = () => {
     }
 
     if (editingProduct !== null) {
-      setProducts(products.map((product) =>
-        product.id === editingProduct ? { ...newProduct, id: editingProduct } : product
-      ));
+      await editProductFromStore(store_info.store_id, editingProduct, newProduct.description, newProduct.price, newProduct.quantity, newProduct.image);
+
+      //setProducts(products.map((product) =>
+      //  product.id === editingProduct ? { ...newProduct, id: editingProduct } : product
+      //));
       setEditingProduct(null);
+      await fetchProducts();
     }
-    else {
+    else{ 
       const filteredList = products.filter(product => newProduct.name === product.name)
       if (filteredList.length !== 0) {
         setError("⚠️ Error: This product already exist!");
@@ -91,38 +157,32 @@ const StoreInventory = () => {
         brand: "123"
       }
 
-      axios.post(urlToPostAddProduct, productToAdd)
-        .then((response) => {
-          console.log("Response from Lambda:", response.data);
-        })
-        .catch((error) => {
-          console.error("Error from Lambda:", error);
-        });
-      console.log("Product json sent to Lambda function:", productToAdd);
-
+      await addProducts(productToAdd);
     }
+
     setNewProduct({ name: "", price: "", quantity: "", brand: "", description: "", image: "", category: categoryChoice }); // Clear form fields after submission
     setError(""); // Clear error after successful addition
-    fetchProducts();
+    await fetchProducts();
     handleSearch();
   };
 
-  const removeProduct = (id) => {
+  const removeProduct = async (id) => {
     setProducts(products.filter((product) => product.id !== id));
     setEditingProduct(null); // Clear editing state if the removed product was being edited
-    fetchProducts();
+    await deleteProductFromStore(store_info.store_id, id);
+     await fetchProducts();
     if (isSearchOn) {
       handleSearch();
     }
   };
 
-  const editProduct = (product) => {
+  const editProduct = async (product) => {
     setNewProduct({ name: product.name, price: product.price, quantity: product.quantity, brand: product.brand, description: product.description, category: product.category, image: product.image });
     setEditingProduct(product.id);
-    fetchProducts();
+    /*await fetchProducts();
     if (isSearchOn) {
       handleSearch();
-    }
+    }*/
   };
 
   const cleanForm = () => {
@@ -171,7 +231,7 @@ const StoreInventory = () => {
           <h2 className="product-details-title">Enter Product Details</h2>
           {error && <p className="error-message">{error}</p>}
           <div className="inventory-form">
-            <input type="text" name="name" placeholder="Product Name" value={newProduct.name} onChange={handleChange} />
+            <input type="text" name="name" placeholder="Product Name" value={newProduct.name} onChange={handleChange} disabled={editingProduct !== null} />
             <input type="text" name="brand" placeholder="Product Brand" value={newProduct.brand} onChange={handleChange} />
             <select name="category" value={newProduct.category} onChange={handleChange}>
               <option value="">select category</option>
@@ -182,7 +242,7 @@ const StoreInventory = () => {
             <input type="text" name="description" placeholder="Product Description" value={newProduct.description} onChange={handleChange} />
             <input type="number" name="price" placeholder="Price" value={newProduct.price} onChange={handleChange} />
             <input type="number" name="quantity" placeholder="Quantity" value={newProduct.quantity} onChange={handleChange} />
-            <input type="text" name="image" placeholder="Image URL" value={newProduct.image} onChange={handleChange} />
+            <input type="text" name="image" placeholder="Image URL" value={newProduct.image || ""} onChange={handleChange} />
             <button onClick={addProduct} className="add-product-btn">{editingProduct !== null ? "Update Product" : "Add Product"}</button>
             {(editingProduct !== null || newProduct.name || parseFloat(newProduct.price) > 0 || parseFloat(newProduct.quantity) > 0 || newProduct.image) && (
               <button onClick={cleanForm} className="cancel-btn">Clean Fields</button>)}
