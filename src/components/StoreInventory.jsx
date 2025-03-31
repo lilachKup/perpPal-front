@@ -1,16 +1,45 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./StoreInventory.css"; // Importing external CSS file
 import categories from "../Utils/Categories"; // Importing categories from a separate file
 import "./CategoryPanel.css";
 import axios from "axios";
 
+///in the future this will be replaced with the store id from the store info
+const store_info = {
+  store_id: 1,
+  store_name: "Store Name",
+  store_address: "Store Address",
+}
+
+
 const StoreInventory = () => {
+  const urlToPostAddProduct = "https://qbaqxcpvnj.execute-api.us-east-1.amazonaws.com/dev/market/items"; //matanlambda
+  //const urlToPostAddProduct = "https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add"; //nivlambda
   const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({ name: "", category: "", price: "", quantity: "", image: "" });
+  const [newProduct, setNewProduct] = useState({ id: "", name: "", category: "", price: "", quantity: "", description: "", brand: "", image: "" });
   const [error, setError] = useState("");
   const [editingProduct, setEditingProduct] = useState(null);
   const [categoryChoice, setCategoryChoice] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredProductsBySearch, setFilteredProductsBySearch] = useState([]);
+  const [isSearchOn, setIsSearchOn] = useState(false);
+  useEffect(() => {
+    fetchProducts();
+  }, []);
 
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = await axios.get(
+        `https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/getAllPProducts/${store_info.store_id}`
+      );
+      setProducts(response.data);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      setError("❌ Failed to fetch products.");
+    }
+  };
 
 
   const handleChange = (e) => {
@@ -19,73 +48,90 @@ const StoreInventory = () => {
   };
 
   const addProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.quantity || newProduct.quantity < 0 || newProduct.price < 0 || !newProduct.category) {
-      setError("⚠️ Error: All fields except image are required!");
-      alert("⚠️ Error: All fields except image are required!");
+
+    const missingFields = [];
+
+    if (!newProduct.name) missingFields.push("Name");
+    if (!newProduct.brand) missingFields.push("Brand");
+    if (!newProduct.category) missingFields.push("Category");
+    if (!newProduct.description) missingFields.push("Description");
+    if (!newProduct.price || newProduct.price < 0) missingFields.push("Price");
+    if (!newProduct.quantity || newProduct.quantity < 0) missingFields.push("Quantity");
+
+    if (missingFields.length > 0) {
+      const message = `⚠️ Error: Missing or invalid fields: ${missingFields.join(", ")}`;
+      setError(message);
       return;
     }
-    const filteredList = products.filter(product => newProduct.name === product.name)
-    if (filteredList.length !== 0) {
-      setError("⚠️ Error: This product already exist!");
-      alert("⚠️ Error: This product already exist!");
-      return;
-    }
+
     if (editingProduct !== null) {
       setProducts(products.map((product) =>
         product.id === editingProduct ? { ...newProduct, id: editingProduct } : product
       ));
       setEditingProduct(null);
     }
-     else {
-      console.log("POST /data received");
+    else {
+      const filteredList = products.filter(product => newProduct.name === product.name)
+      if (filteredList.length !== 0) {
+        setError("⚠️ Error: This product already exist!");
+        alert("⚠️ Error: This product already exist!");
+        return;
+      }
+
       setProducts([...products, { ...newProduct, id: Date.now() }]);
-      axios.post("https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add", {
-        store_id: 2,
+
+      const productToAdd = {
+        store_id: store_info.store_id,
         product_name: newProduct.name,
         category: newProduct.category,
         description: " ",
-        tag: " ",
-        price: newProduct.price,
-        quantity: newProduct.quantity,
-        image_url: null
+        price: Number(newProduct.price),
+        quantity: Number(newProduct.quantity),
+        image_url: "",
+        brand: "123"
+      }
 
-        /*market_id: 0,
-        name: newProduct.name,
-        description: " ",
-        price: newProduct.price,
-        category: newProduct.category,
-        quantity: newProduct.quantity,
-        image: null*/
-      })
-      .then((response) => {
-        console.log("Response from Lambda:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error from Lambda:", error);
-      });
-      
+      axios.post(urlToPostAddProduct, productToAdd)
+        .then((response) => {
+          console.log("Response from Lambda:", response.data);
+        })
+        .catch((error) => {
+          console.error("Error from Lambda:", error);
+        });
+      console.log("Product json sent to Lambda function:", productToAdd);
 
     }
-    setNewProduct({ name: "", price: "", quantity: "", image: "", category: categoryChoice }); // Clear form fields after submission
+    setNewProduct({ name: "", price: "", quantity: "", brand: "", description: "", image: "", category: categoryChoice }); // Clear form fields after submission
     setError(""); // Clear error after successful addition
+    fetchProducts();
+    handleSearch();
   };
 
   const removeProduct = (id) => {
     setProducts(products.filter((product) => product.id !== id));
+    setEditingProduct(null); // Clear editing state if the removed product was being edited
+    fetchProducts();
+    if (isSearchOn) {
+      handleSearch();
+    }
   };
 
   const editProduct = (product) => {
-    setNewProduct({ name: product.name, price: product.price, quantity: product.quantity, image: product.image });
+    setNewProduct({ name: product.name, price: product.price, quantity: product.quantity, brand: product.brand, description: product.description, category: product.category, image: product.image });
     setEditingProduct(product.id);
+    fetchProducts();
+    if (isSearchOn) {
+      handleSearch();
+    }
   };
 
   const cleanForm = () => {
-    setNewProduct({ name: "", price: "", quantity: "", image: "" });
+    setNewProduct({ name: "", price: "", quantity: "", image: "", brand: "", description: "", category: "" });
     setEditingProduct(null);
     setError("");
   };
 
-  const HandleCategoryClick = (e) => {  
+  const HandleCategoryClick = (e) => {
     setCategoryChoice(e);
     setNewProduct({ ...newProduct, category: e });
 
@@ -96,6 +142,27 @@ const StoreInventory = () => {
     setNewProduct({ ...newProduct, category: "" });
   }
 
+  const handleSearch = () => {
+    setIsSearchOn(true);
+    console.log("handle search.");
+    console.log("search term: ", searchTerm);
+    console.log("products: ", products);
+    if (!searchTerm.trim()) {
+      console.log("No search term provided.");
+      return;
+    }
+    const filtered = products.filter((product) =>
+      product.name.toLowerCase().startsWith(searchTerm.toLowerCase()) && (!categoryChoice || product.category === categoryChoice));
+    console.log(filtered);
+    setFilteredProductsBySearch(filtered);
+  };
+
+  const handleClearSearch = () => {
+    setIsSearchOn(false);
+    setSearchTerm("");
+    setFilteredProductsBySearch([]);
+  };
+
   return (
     <div className="inventory-title">
       <h1 className="inventory-management-title">Inventory Management</h1>
@@ -105,12 +172,14 @@ const StoreInventory = () => {
           {error && <p className="error-message">{error}</p>}
           <div className="inventory-form">
             <input type="text" name="name" placeholder="Product Name" value={newProduct.name} onChange={handleChange} />
+            <input type="text" name="brand" placeholder="Product Brand" value={newProduct.brand} onChange={handleChange} />
             <select name="category" value={newProduct.category} onChange={handleChange}>
               <option value="">select category</option>
               {categories.map((category, index) => (
                 <option key={index} value={category}>{category}</option>
               ))}
             </select>
+            <input type="text" name="description" placeholder="Product Description" value={newProduct.description} onChange={handleChange} />
             <input type="number" name="price" placeholder="Price" value={newProduct.price} onChange={handleChange} />
             <input type="number" name="quantity" placeholder="Quantity" value={newProduct.quantity} onChange={handleChange} />
             <input type="text" name="image" placeholder="Image URL" value={newProduct.image} onChange={handleChange} />
@@ -119,31 +188,50 @@ const StoreInventory = () => {
               <button onClick={cleanForm} className="cancel-btn">Clean Fields</button>)}
           </div>
         </div>
-        <div className="category-container">
-          <h2 className="category-title">Categories</h2>
-          <ul className="category-list">
-            {categories.map((category, index) => (
-              <li key={index}>
-                <button className={`category-item ${categoryChoice === category ? "active" : ""}`} onClick={() => {HandleCategoryClick(category)}}>{category}</button>
-              </li>
-            ))}
-          </ul>
-          {(categoryChoice) && (<button className="cancel-choice" onClick={handleNoneCategoryClick}>None</button>)}
-        </div>
-      </div>
-      <ul className="product-list">
-        {products.filter((product) => (!categoryChoice || product.category === categoryChoice)).map((product) => (
-          <li key={product.id} className="product-item">
-            <img src={product.image || "https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png"} alt={product.name} className="product-image" />
-            <div className="product-details">
-              <span>{product.name}</span>
-              <span>{product.category}</span>
-              <span>{product.price}₪ - {product.quantity} pcs</span>
-              <button onClick={() => editProduct(product)} className="edit-btn">Edit</button>
-              <button onClick={() => removeProduct(product.id)} className="remove-btn">Remove</button>
+
+        <div className="catogory-search-panel">
+          <div className="category-container">
+            <h2 className="category-title">Categories</h2>
+            <ul className="category-list">
+              {categories.map((category, index) => (
+                <li key={index}>
+                  <button className={`category-item ${categoryChoice === category ? "active" : ""}`} onClick={() => { HandleCategoryClick(category) }}>{category}</button>
+                </li>
+              ))}
+            </ul>
+            {(categoryChoice) && (<button className="cancel-choice" onClick={handleNoneCategoryClick}>None</button>)}
+          </div>
+
+          <div className="search-container">
+            <input type="text" placeholder="Search product name" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="search-input" />
+            <div className="search-buttons">
+              <button onClick={handleSearch} className="search-btn">Search</button>
+              <button onClick={handleClearSearch} className="clear-btn">Clear</button>
             </div>
-          </li>
-        ))}
+          </div>
+        </div>
+
+      </div>
+
+
+      <ul className="product-list">
+        {(filteredProductsBySearch.length > 0 ? filteredProductsBySearch : products)
+          .filter((product) => (!categoryChoice || product.category === categoryChoice)).map((product) => (
+            <li key={product.id} className="product-card">
+              <div className="product-image">
+                <img src={product.image || "https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png"} alt={product.name} />
+              </div>
+              <div className="product-content">
+                <h3 className="product-name">{product.name}</h3>
+                <p className="product-brand">{product.brand}</p>
+                <p className="product-meta">{product.price}₪ | {product.quantity} pcs</p>
+                <div className="product-actions">
+                  <button onClick={() => editProduct(product)} className="edit-btn">Edit</button>
+                  <button onClick={() => removeProduct(product.id)} className="remove-btn">Remove</button>
+                </div>
+              </div>
+            </li>
+          ))}
       </ul>
     </div>
   );

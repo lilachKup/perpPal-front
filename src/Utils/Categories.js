@@ -18,6 +18,6 @@ const categories =
     "Alcohol",
     "Cleaning Supplies",
     "Disposable products",
-    "Personal Care"
+    "Personal Care",
   ];
   export default categories;
