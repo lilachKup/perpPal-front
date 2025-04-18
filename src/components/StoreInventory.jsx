@@ -38,19 +38,26 @@ const StoreInventory = () => {
       return response.data;
     } catch (error) {
       console.error("Error from Lambda:", error);
-      throw error; 
+      throw error;
     }
   }
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get(
-        `https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/getAllPProducts/${store_info.store_id}`
-      );
-      setProducts(response.data);
+      const response = await axios.get(`...`);
+      const data = response.data;
+
+      const productsArray = Array.isArray(data)
+        ? data
+        : Array.isArray(data.products)
+          ? data.products
+          : [];
+
+      setProducts(productsArray);
     } catch (error) {
       console.error("Error fetching products:", error);
       setError("❌ Failed to fetch products.");
+      setProducts([]); // fail-safe
     }
   };
 
@@ -136,7 +143,7 @@ const StoreInventory = () => {
       setEditingProduct(null);
       await fetchProducts();
     }
-    else{ 
+    else {
       const filteredList = products.filter(product => newProduct.name === product.name)
       if (filteredList.length !== 0) {
         setError("⚠️ Error: This product already exist!");
@@ -170,7 +177,7 @@ const StoreInventory = () => {
     setProducts(products.filter((product) => product.id !== id));
     setEditingProduct(null); // Clear editing state if the removed product was being edited
     await deleteProductFromStore(store_info.store_id, id);
-     await fetchProducts();
+    await fetchProducts();
     if (isSearchOn) {
       handleSearch();
     }
@@ -275,8 +282,9 @@ const StoreInventory = () => {
 
 
       <ul className="product-list">
-        {(filteredProductsBySearch.length > 0 ? filteredProductsBySearch : products)
-          .filter((product) => (!categoryChoice || product.category === categoryChoice)).map((product) => (
+        {((filteredProductsBySearch && filteredProductsBySearch.length > 0 ? filteredProductsBySearch : products) || [])
+          .filter((product) => (!categoryChoice || product.category === categoryChoice))
+          .map((product) => (
             <li key={product.id} className="product-card">
               <div className="product-image">
                 <img src={product.image || "https://img.icons8.com/ios-filled/50/ffffff/shopping-cart.png"} alt={product.name} />
