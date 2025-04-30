@@ -113,10 +113,14 @@ export default function App() {
 
 
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+//import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+
 import AuthTabs from './components/users/AuthTabs';
 import { useAuth } from 'react-oidc-context';
 import CallbackPage from './CallbackPage';
+import ConfirmRegistration from "./components/users/ConfirmRegistration";
+
 
 //import { Route, Routes } from "react-router-dom";
 //import CallbackPage from "./CallbackPage";
@@ -141,12 +145,14 @@ export default function App() {
   if (auth.error) return <p>Error: {auth.error.message}</p>;
 
   return (
-    <Router>
+    <Router basename="/">
       <Routes>
         <Route path="/test" element={<p>✅ This is a test page</p>} />
 
         {/* דף התחברות/הרשמה */}
         <Route path="/" element={<AuthTabs />} />
+
+        <Route path="/confirm" element={<ConfirmRegistration />} />
 
         {/* דף חזרה מההתחברות */}
         <Route path="/callback" element={<CallbackPage />} />
