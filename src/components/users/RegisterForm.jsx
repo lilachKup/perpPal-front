@@ -131,7 +131,7 @@ export default function RegisterForm() {
             const domain = "https://us-east-1z7qmmz7jr.auth.us-east-1.amazoncognito.com";
             const clientId = "p2i40ahcfq7embinuejq5kdes";
             const redirectUri = window.location.origin + "/callback";
-            const loginUrl = `${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(redirectUri)}`;
+            //const loginUrl = `${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(redirectUri)}`;
             window.location.href = `/confirm?email=${encodeURIComponent(email)}`;
 
           }}
