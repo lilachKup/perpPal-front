@@ -145,7 +145,7 @@ export default function App() {
   if (auth.error) return <p>Error: {auth.error.message}</p>;
 
   return (
-    <Router basename="/">
+    <BrowserRouter  basename="/">
       <Routes>
         <Route path="/test" element={<p>✅ This is a test page</p>} />
 
@@ -172,7 +172,7 @@ export default function App() {
         />
 
       </Routes>
-    </Router>
+    </BrowserRouter >
   );
 }
 
