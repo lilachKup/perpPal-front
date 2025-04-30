@@ -4,7 +4,7 @@ const path = require('path');
 const { Issuer, generators } = require('openid-client')
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // הגדרת מנוע תצוגה
 app.set('view engine', 'ejs');
@@ -27,7 +27,7 @@ async function initializeClient() {
     client = new issuer.Client({
         client_id: 'ehfkh00ld0q6p3641hnq3mseq',
         client_secret: '19it1a10ccfskejhv75hrjjf7n11s9m0sboj6gb49uhjgk0mg5r7',
-        redirect_uris: ['https://d84l1y8p4kdic.cloudfront.net/callback'],
+        redirect_uris: ['http://localhost:3001/callback'],
         response_types: ['code']
     });
 }
@@ -70,7 +70,7 @@ app.get('/callback', async (req, res) => {
         const params = client.callbackParams(req);
 
         const tokenSet = await client.callback(
-            'https://d84l1y8p4kdic.cloudfront.net/callback',
+            'http://localhost:3001/callback',
             params,
             {
                 nonce: req.session.nonce,
@@ -80,8 +80,9 @@ app.get('/callback', async (req, res) => {
 
         const userInfo = await client.userinfo(tokenSet.access_token);
         req.session.userInfo = userInfo;
-
-        res.redirect('/');
+        
+        console.log('User info:', userInfo);
+        res.redirect('http://localhost:3000/');
     } catch (err) {
         console.error('Callback error:', err);
         res.redirect('/');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./StoreInventory.css"; // Importing external CSS file
-import categories from "../Utils/Categories"; // Importing categories from a separate file
+import categories from "./Utils/Categories"; // Importing categories from a separate file
 import "./CategoryPanel.css";
 import axios from "axios";
 
