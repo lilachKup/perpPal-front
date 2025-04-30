@@ -25,7 +25,7 @@ import { AuthProvider } from "react-oidc-context";
 const cognitoAuthConfig = {
   authority: "https://us-east-1z7qmmz7jr.auth.us-east-1.amazoncognito.com", // Hosted UI domain
   client_id: "p2i40ahcfq7embinuejq5kdes",
-  redirect_uri: "http://localhost:3000/callback", // כתובת החזרה
+  redirect_uri: window.location.origin + "/callback", // כתובת החזרה
   response_type: "code", // OAuth2 Authorization Code Flow
   scope: "email openid phone", // scopes
   loadUserInfo: true,
