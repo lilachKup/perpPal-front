@@ -132,7 +132,8 @@ export default function RegisterForm() {
             const clientId = "p2i40ahcfq7embinuejq5kdes";
             const redirectUri = window.location.origin + "/callback";
             const loginUrl = `${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(redirectUri)}`;
-            window.location.href = loginUrl;
+            window.location.href = `/confirm?email=${encodeURIComponent(email)}`;
+
           }}
         >
           Continue to verify
