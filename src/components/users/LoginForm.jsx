@@ -4,11 +4,11 @@ import {
   AuthenticationDetails,
   CognitoUserPool
 } from "amazon-cognito-identity-js";
-import "./RegisterForm.css"; // משתמשים באותו עיצוב
+import "./RegisterForm.css";
 
 const poolData = {
-  UserPoolId: "us-east-1_O8ggAWzoZ",
-  ClientId: "ehfkh00ld0q6p3641hnq3mseq"
+  UserPoolId: "us-east-1_Z7qmmZ7jR",
+  ClientId: "p2i40ahcfq7embinuejq5kdes"
 };
 
 const userPool = new CognitoUserPool(poolData);
@@ -28,12 +28,17 @@ export default function LoginForm() {
         console.log("✅ Logged in!", idToken);
         setMessage("✅ Logged in!");
         localStorage.setItem("idToken", idToken);
-        // אפשרות לניווט:
-        // window.location.href = "/dashboard";
+        // אפשר לנתב:
+        // window.location.href = "/home";
       },
       onFailure: (err) => {
         console.error("❌ Login failed", err);
-        setMessage("❌ " + err.message);
+        if (err.code === "UserNotConfirmedException") {
+          setMessage("❗ Email not confirmed. Please check your inbox.");
+          window.location.href = `/confirm?email=${encodeURIComponent(email)}`;
+        } else {
+          setMessage("❌ " + err.message);
+        }
       }
     });
   };
