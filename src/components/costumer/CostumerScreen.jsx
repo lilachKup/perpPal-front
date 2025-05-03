@@ -1,11 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import OrderChat from "./OrderChat";
 import CurrentOrder from "./CurrentOrder";
 import './CustomerScreen.css';
 
-export default function CustomerScreen() {
+export default function CustomerScreen({ userId }) {
     const [orderItems, setOrderItems] = useState([]);
     const [orderSent, setOrderSent] = useState(false);
+
+    useEffect(() => {
+        console.log("Customer user ID:", userId);
+      }, [userId]);
 
     const handleNewItems = (itemsList) => {
         if (!Array.isArray(itemsList)) return;

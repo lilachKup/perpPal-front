@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import './RegisterForm.css';
 import {
   CognitoUser,
   CognitoUserPool
@@ -52,6 +53,7 @@ export default function ConfirmRegistration() {
       <input
         type="email"
         value={email}
+        readOnly
         onChange={(e) => setEmail(e.target.value)}
         className="form-input"
       />

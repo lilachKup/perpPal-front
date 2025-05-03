@@ -5,14 +5,10 @@ import "./CategoryPanel.css";
 import axios from "axios";
 
 ///in the future this will be replaced with the store id from the store info
-const store_info = {
-  store_id: 1,
-  store_name: "Store Name",
-  store_address: "Store Address",
-}
 
 
-const StoreInventory = () => {
+
+const StoreInventory = ({ userId }) => {
   //const urlToPostAddProduct = "https://qbaqxcpvnj.execute-api.us-east-1.amazonaws.com/dev/market/items"; //matanlambda
   //const urlToPostAddProduct = "https://xgpbt0u4ql.execute-api.us-east-1.amazonaws.com/prod/products/add"; //nivlambda
   const [products, setProducts] = useState([]);
@@ -27,6 +23,18 @@ const StoreInventory = () => {
     fetchProducts();
   }, []);
 
+  useEffect(() => {
+    console.log("Store user ID:", userId);
+    // אפשר להשתמש בזה כדי למשוך מוצרים לפי ID
+  }, [userId]);
+  
+
+  const store_info = {
+    //store_id: userId,
+    store_id: 1,
+    store_name: "Store Name",
+    store_address: "Store Address",
+  }
 
   const addProducts = async (productToAdd) => {
     try {

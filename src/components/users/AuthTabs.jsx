@@ -4,29 +4,32 @@ import { useAuth } from 'react-oidc-context';
 import './AuthTabs.css';
 
 export default function AuthTabs() {
-  const [activeTab, setActiveTab] = useState('signup');
-  const auth = useAuth();
+    const [activeTab, setActiveTab] = useState('signup');
+    const auth = useAuth();
 
-  return (
-    <div className="auth-tabs-container">
-      <div className="tab-header">
-        <div
-          className={`tab-button ${activeTab === 'signup' ? 'active' : ''}`}
-          onClick={() => setActiveTab('signup')}
-        >
-          Sign Up
-        </div>
-        <div
-          className="tab-button"
-          onClick={() => auth.signinRedirect()}
-        >
-          Login
-        </div>
-      </div>
+    if (auth.isLoading) return <p>Loading auth...</p>;
+    if (auth.error) return <p>Error: {auth.error.message}</p>;
 
-      <div className="tab-content">
-        {activeTab === 'signup' && <RegisterForm />}
-      </div>
-    </div>
-  );
+    return (
+        <div className="auth-tabs-container">
+            <div className="tab-header">
+                <div
+                    className={`tab-button ${activeTab === 'signup' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('signup')}
+                >
+                    Sign Up
+                </div>
+                <div
+                    className="tab-button"
+                    onClick={() => auth.signinRedirect()}
+                >
+                    Login
+                </div>
+            </div>
+
+            <div className="tab-content">
+                {activeTab === 'signup' && <RegisterForm />}
+            </div>
+        </div>
+    );
 }

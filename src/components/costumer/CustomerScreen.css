@@ -1,25 +1,4 @@
-/*.send-order-btn {
-    padding: 12px;
-    background-color: #4A90E2;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    width: 100%;
-    margin-top: 10px;
-    transition: background-color 0.2s ease;
-  }
-  
-  .send-order-btn:hover:enabled {
-    background-color: #357abd;
-  }
-  
-  .send-order-btn:disabled {
-    background-color: #bbb;
-    cursor: not-allowed;
-  }*/
-  
+
   
   .customer-layout {
     display: flex;

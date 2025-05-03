@@ -1,75 +1,148 @@
 .register-form {
-    background-color: #fcf9ff;
-    padding: 2rem;
-    max-width: 400px;
-    margin: 2rem auto;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
-    font-family: 'Segoe UI', sans-serif;
-    color: #33115f;
-  }
-  
-  .form-title {
-    text-align: center;
-    font-size: 1.5rem;
-    margin-bottom: 1.5rem;
-    color: #3a0ca3;
-  }
-  
-  .user-type-tabs {
-    display: flex;
-    justify-content: center;
-    border-bottom: 2px solid #ddd;
-    margin-bottom: 1.5rem;
-  }
-  
-  .tab {
-    flex: 1;
-    text-align: center;
-    padding: 0.75rem;
-    font-weight: bold;
-    cursor: pointer;
-    background-color: #f5f3fa;
-    color: #555;
-    border-bottom: 3px solid transparent;
-    transition: all 0.3s ease;
-  }
-  
-  .tab.active {
-    background-color: #fff;
-    color: #3a0ca3;
-    border-bottom: 3px solid #3a0ca3;
-  }
-  
-  .form-input {
-    width: 100%;
-    padding: 0.5rem;
-    margin: 0.25rem 0 1rem 0;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 0.9rem;
-  }
-  
-  .submit-btn {
-    width: 100%;
-    background-color: #4a90e2;
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 6px;
-    font-weight: bold;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    transition: background-color 0.3s ease;
-  }
-  
-  .submit-btn:hover {
-    background-color: #397bd2;
-  }
-  
-  .form-message {
-    margin-top: 1rem;
-    text-align: center;
-    font-weight: 500;
-  }
-  
+  max-width: 400px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form-title {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+  text-align: center;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.submit-btn {
+  width: 100%;
+  background-color: #3a0ca3;
+  color: white;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.submit-btn:hover {
+  background-color: #240678;
+}
+
+.form-message {
+  text-align: center;
+  font-size: 0.95rem;
+  margin-top: 1rem;
+  color: #d00000;
+}
+
+.user-type-tabs {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 1.5rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-radius: 6px 6px 0 0;
+  font-weight: bold;
+  color: #555;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.tab.active {
+  background-color: #3a0ca3;
+  color: white;
+  border-bottom: 2px solid #3a0ca3;
+}
+
+/* עין לחשיפת סיסמה */
+.password-container {
+  position: relative;
+}
+
+.password-container .form-input {
+  padding-right: 2.5rem;
+  line-height: 1.5rem;
+  height: 44px; /* גובה קבוע למניעת קפיצות */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 1.3rem;
+  color: #3a0ca3;
+  user-select: none;
+  display: flex;
+  align-items: center;
+}
+
+.password-input {
+  padding-right: 2.5rem !important;
+  height: 44px;
+  line-height: 1.5rem;
+}
+
+
+
+
+/* טלפון עם קידומת */
+.phone-container {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 1rem;
+}
+
+.phone-prefix {
+  height: 42.5px;                /* גובה אחיד */
+  padding: 0 10px;             /* padding אופקי בלבד */
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+  border-right: none;
+  border-radius: 6px 0 0 6px;
+  font-size: 0.95rem;
+  color: #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.phone-input {
+  flex: 1;
+  height: 44px;               /* זהה לקידומת */
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+}
+
+
+
+
+input[readonly] {
+  background-color: #f9f9f9;
+  color: #555;
+  cursor: not-allowed;
+}

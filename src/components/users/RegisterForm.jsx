@@ -3,8 +3,8 @@ import {
   CognitoUserPool,
   CognitoUserAttribute
 } from 'amazon-cognito-identity-js';
-import { useAuth } from 'react-oidc-context';
 import './RegisterForm.css';
+import { useAuth } from 'react-oidc-context';
 
 const poolData = {
   UserPoolId: 'us-east-1_Z7qmmZ7jR',
@@ -14,9 +14,10 @@ const poolData = {
 const userPool = new CognitoUserPool(poolData);
 
 export default function RegisterForm() {
-  const auth = useAuth(); // ✅ שימוש ב־OIDC
+  const auth = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [userType, setUserType] = useState('customer');
   const [storeName, setStoreName] = useState('');
   const [storeHours, setStoreHours] = useState('');
@@ -34,6 +35,11 @@ export default function RegisterForm() {
       return;
     }
 
+    if (!/^\d{9}$/.test(phoneNumber)) {
+      setMessage("❌ Invalid phone number (must be 9 digits)");
+      return;
+    }
+
     if (userType === 'store' && (!storeName || !storeHours)) {
       setMessage("❌ Please fill in all store details");
       return;
@@ -48,7 +54,7 @@ export default function RegisterForm() {
       new CognitoUserAttribute({ Name: 'email', Value: email }),
       new CognitoUserAttribute({ Name: 'custom:user_type', Value: userType }),
       new CognitoUserAttribute({ Name: 'custom:address', Value: address }),
-      new CognitoUserAttribute({ Name: 'phone_number', Value: phoneNumber })
+      new CognitoUserAttribute({ Name: 'phone_number', Value: `+972${phoneNumber}` }),
     ];
 
     if (userType === 'store') {
@@ -67,7 +73,10 @@ export default function RegisterForm() {
       } else {
         console.log('✔️ Registered successfully', result);
         setMessage('✔️ Registered successfully!');
-        setRegistrationSuccess(true); // ✅ הצגת כפתור Login
+        setRegistrationSuccess(true);
+        setTimeout(() => {
+          window.location.href = `/confirm?email=${encodeURIComponent(email)}`;
+        }, 500);
       }
     });
   };
@@ -89,56 +98,69 @@ export default function RegisterForm() {
       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="form-input" />
 
       <label>Password:</label>
-      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="form-input" />
+      <div className="password-container">
+        <input
+          type={showPassword ? "text" : "password"}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="form-input password-input"
+        />
+        <span
+          className="toggle-password"
+          onClick={() => setShowPassword(!showPassword)}
+          title={showPassword ? "Hide password" : "Show password"}
+        >
+          {showPassword ? "🙈" : "👁"}
+        </span>
+      </div>
+
 
       <label>Address:</label>
       <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="form-input" />
 
       <label>Phone number:</label>
-      <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="form-input" />
+      <div className="phone-container">
+        <span className="phone-prefix">+972</span>
+        <input
+          type="tel"
+          value={phoneNumber}
+          onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+          maxLength={9}
+          className="form-input phone-input"
+        />
+        </div>
 
-      {userType === 'store' && (
-        <>
-          <label>Store name:</label>
-          <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="form-input" />
 
-          <label>Opening hours:</label>
-          <input type="text" value={storeHours} onChange={(e) => setStoreHours(e.target.value)} className="form-input" />
-        </>
-      )}
 
-      {userType === 'customer' && (
-        <>
-          <label>First name:</label>
-          <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="form-input" />
+        {userType === 'store' && (
+          <>
+            <label>Store name:</label>
+            <input type="text" value={storeName} onChange={(e) => setStoreName(e.target.value)} className="form-input" />
 
-          <label>Last name:</label>
-          <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="form-input" />
+            <label>Opening hours:</label>
+            <input type="text" value={storeHours} onChange={(e) => setStoreHours(e.target.value)} className="form-input" />
+          </>
+        )}
 
-          <label>Zip code:</label>
-          <input type="text" value={zipCode} onChange={(e) => setZipCode(e.target.value)} className="form-input" />
-        </>
-      )}
+        {userType === 'customer' && (
+          <>
+            <label>First name:</label>
+            <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} className="form-input" />
 
-      <button onClick={handleRegister} className="submit-btn">Sign Up</button>
+            <label>Last name:</label>
+            <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} className="form-input" />
 
-      <p className="form-message">{message}</p>
+            <label>Zip code:</label>
+            <input type="text" value={zipCode} onChange={(e) => setZipCode(e.target.value)} className="form-input" />
+          </>
+        )}
 
-      {registrationSuccess && (
-        <button
-          className="submit-btn"
-          onClick={() => {
-            const domain = "https://us-east-1z7qmmz7jr.auth.us-east-1.amazoncognito.com";
-            const clientId = "p2i40ahcfq7embinuejq5kdes";
-            const redirectUri = window.location.origin + "/callback";
-            //const loginUrl = `${domain}/login?client_id=${clientId}&response_type=code&scope=email+openid+phone&redirect_uri=${encodeURIComponent(redirectUri)}`;
-            window.location.href = `/confirm?email=${encodeURIComponent(email)}`;
+        <button onClick={handleRegister} className="submit-btn">Sign Up</button>
+        <p className="form-message">{message}</p>
 
-          }}
-        >
-          Continue to verify
-        </button>
-      )}
-    </div>
-  );
+        {registrationSuccess && (
+          <p className="form-message">✔️ Please check your email to confirm</p>
+        )}
+      </div>
+      );
 }
